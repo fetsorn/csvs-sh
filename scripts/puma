@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# "a tree cat that executes"
+# suggested by @that-other-guy
+# at https://stackoverflow.com/questions/70841809/what-should-this-bash-script-be-called
+
+usage () {
+  printf 1>&2 "%s\n" "Usage: $0 [-c] INPUTPATH COMMAND OUTPUTDIR OUTPUTNAME
+
+  Pipes files in INPUTPATH to 'eval COMMAND'
+  writes output to OUTPUTDIR/files/DATE-OUTPUTNAME
+  creates symbolic link at OUTPUTDIR/links/OUTPUTNAME
+
+  OPTIONS:
+    -c Concatenate files in INPUTPATH before piping to 'eval COMMAND'
+
+  EXAMPLE:
+    $0 \"assets/2001\" \"scripts/cache\" \"../ops/cache\" \"2001\""
+}
+
+unset concatenate
+OPTIND=1
+
+while getopts 'c' opt; do
+  case $opt in
+    c) concatenate=1 ;;
+    *) printf "%s\n" "OPTIONS: -c Concatenate files in INPUTPATH before piping to 'eval COMMAND'" >&2
+       exit 1
+  esac
+done
+shift "$(( OPTIND - 1 ))"
+
+if [ $# -ne 4 ]; then
+  usage
+  exit 3
+fi
+
+inputpath="$1"
+cmd="$2"
+outputdir="$3"
+outputname="$4"
+
+filedir="$outputdir/files"
+linkdir="$outputdir/links"
+
+mkdir -p "$filedir" "$linkdir"
+
+starttime=$(date +%Y%m%d-%H%M%S)
+outputfile="$filedir/$starttime-$outputname"
+outputlink="$linkdir/$outputname"
+
+# sort input files to puma in predictable order
+
+# do not follow symlinks here to avoid file system loops
+# do not follow symlinks provided on the command-line as such arguments are hard to build
+# to resolve symlinks to asset folders add a trailing backslash to INPUTPATH
+
+# default `find` output is necessary for broad compatibility
+# further filtering should happen inside the COMMAND script
+# "concat only one argument" forbids -mindepth 1
+# "list only folder contents" requires -mindepth 1 to avoid recursion in ./
+# "concat all folder contents" requires -mindepth 1 to avoid catting ./
+if [[ "$concatenate" -gt 0 ]]; then
+  input=$(find "$inputpath" ! -name ".DS_Store" | sort | xargs cat)
+else
+  input=$(find "$inputpath" ! -name ".DS_Store" | sort)
+fi
+
+amount=$(wc -l <<< "$input");
+printf 1>&2 "| %s | %s | %s | %s\n" "$inputpath" "$outputdir" "$outputname" "$amount";
+
+eval "$cmd" <<< "$input" > "$outputfile"
+
+rm -f "$outputlink"
+ln -s "$(realpath "$outputfile")" "$outputlink"
