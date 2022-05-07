@@ -1,0 +1,38 @@
+#!/bin/bash
+
+usage () {
+  printf 1>&2 "%s\n" "Usage: $0
+
+  csvs - general-purpose plain-text database
+
+  SUBCOMMANDS:
+  build    Reads a stream of datum_uuid,datum pairs, outputs biorg
+  break    Reads biorg, breaks each node, outputs path to a temporary metadir
+  gc       Deduplicates, sorts, and removes garbage from metadir
+  sync     Syncs metadir with a biorg file
+  merge    Merges one metadir into another
+"
+}
+
+SCRIPTS="${BASH_SOURCE%/*}"
+if [[ ! -d "$SCRIPTS" ]]; then SCRIPTS="$PWD"; fi
+
+case "$1" in
+build)
+  shift
+  bash "$SCRIPTS/build-biorg" "$@";;
+"break")
+  shift
+  gawk -f "$SCRIPTS/break-biorg" -v CONFIG="$PWD/metadir.json" "$@";;
+gc)
+  shift
+  bash "$SCRIPTS/gc" "$@";;
+sync)
+  shift
+  bash "$SCRIPTS/mdirsync" "$@";;
+merge)
+  shift
+  bash "$SCRIPTS/merge" "$@";;
+*)
+  usage;;
+esac

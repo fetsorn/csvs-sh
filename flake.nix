@@ -43,6 +43,7 @@
             substituteInPlace build-biorg --replace "bash" "${pkgs.bash}/bin/bash"
             substituteInPlace mdirsync --replace "bash" "${pkgs.bash}/bin/bash"
             substituteInPlace mdirsync --replace "awk" "${pkgs.gawk}/bin/awk"
+            substituteInPlace csvs --replace "awk" "${pkgs.gawk}/bin/awk"
             substituteInPlace gc --replace "jq" "${pkgs.jq}/bin/jq"
             substituteInPlace gc --replace "sponge" "${pkgs.moreutils}/bin/sponge"
             substituteInPlace lookup --replace "grep" "${pkgs.gnugrep}/bin/grep"
@@ -65,7 +66,6 @@
             gawk
             jq
             moreutils
-            parallel
             ripgrep
           ];
         };

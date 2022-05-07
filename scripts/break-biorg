@@ -527,7 +527,7 @@ function set_uuid(prop,       prop_value_bash, prop_uuid) {
     }
     uuids[prop]=prop_uuid;
 }
-function write_prop(prop, parent, parent_uuid,       prop_value_escaped, prop_dir, prop_index, prop_pair) {
+function write_prop(prop, parent, parent_uuid, prop_value_escaped, prop_dir, prop_index, prop_pair) {
 
     if (parsed[prop] == 0) { return }
     prop_value_escaped = values[prop];
