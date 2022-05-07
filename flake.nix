@@ -50,6 +50,8 @@
             substituteInPlace build-biorg --replace "grep" "${pkgs.gnugrep}/bin/grep"
             substituteInPlace merge --replace "grep" "${pkgs.gnugrep}/bin/grep"
             substituteInPlace break-biorg --replace "grep" "${pkgs.gnugrep}/bin/grep"
+            substituteInPlace break-fs --replace "parallel" "${pkgs.parallel}/bin/parallel"
+            substituteInPlace break-fs --replace "jq" "${pkgs.jq}/bin/jq"
           '';
           installPhase = ''
             mkdir -p $out/bin/
@@ -66,6 +68,7 @@
             gawk
             jq
             moreutils
+            parallel
             ripgrep
           ];
         };

@@ -6,11 +6,12 @@ usage () {
   csvs - general-purpose plain-text database
 
   SUBCOMMANDS:
-  build    Reads a stream of datum_uuid,datum pairs, outputs biorg
-  break    Reads biorg, breaks each node, outputs path to a temporary metadir
-  gc       Deduplicates, sorts, and removes garbage from metadir
-  sync     Syncs metadir with a biorg file
-  merge    Merges one metadir into another
+  build    Read \"datum_uuid,datum\" pairs, output biorg
+  break    Read biorg, break each node, output path to a temporary metadir
+  cache    Read paths from stdin, break, output path to a temporary metadir
+  gc       Deduplicate, sort, and remove garbage from metadir
+  sync     Sync metadir with a biorg file
+  merge    Merge one metadir into another
 "
 }
 
@@ -24,15 +25,18 @@ build)
 "break")
   shift
   gawk -f "$SCRIPTS/break-biorg" -v CONFIG="$PWD/metadir.json" "$@";;
+cache)
+  shift
+  bash "$SCRIPTS/break-fs" "$@";;
 gc)
   shift
   bash "$SCRIPTS/gc" "$@";;
-sync)
-  shift
-  bash "$SCRIPTS/mdirsync" "$@";;
 merge)
   shift
   bash "$SCRIPTS/merge" "$@";;
+sync)
+  shift
+  bash "$SCRIPTS/mdirsync" "$@";;
 *)
   usage;;
 esac

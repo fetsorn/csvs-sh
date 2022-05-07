@@ -5,21 +5,23 @@ Query and edit csvs data in human-readable formats with your favorite text edito
 
 * API
 
-csvs break - Reads a biorg compilation, breaks each node, outputs path to a temporary metadir
+csvs build - Read a stream of "datum_uuid,datum" pairs from stdin, look up props in metadir, output biorg
 
-csvs build - Reads a stream of datum_uuid,datum pairs from stdin, looks up props in metadir, outputs biorg
+csvs break - Read biorg, break each node, output path to a temporary metadir
 
-csvs gc - Deduplicates, sorts, and removes garbage from metadir
+csvs cache - Read paths from stdin, break, output path to a temporary metadir
 
-csvs sync - Syncs metadir with a biorg file
+csvs gc - Deduplicate, sort, and remove garbage from metadir
 
-csvs merge - Merges one metadir into another
+csvs sync - Sync metadir with a biorg file
+
+csvs merge - Merge one metadir into another
 
 * Setup
 #+begin_src sh
 # enter a dev shell
 nix develop
-# or install bash_unit, coreutils, file, gawk, jq, moreutils, ripgrep
+# or install bash_unit, coreutils, file, gawk, jq, moreutils, parallel, ripgrep
 
 # run tests
 bash_unit tests/*
