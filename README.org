@@ -31,6 +31,6 @@ bash_unit tests/*
 * More csvs projects
 [[https://github.com/fetsorn/csvs-spec][csvs-spec]] - format description
 
-[[https://github.com/fetsorn/csvs-ui][csvs-ui]] - Web UI. Develop the story of your own data.
+[[https://github.com/fetsorn/qualia][qualia]] - Web UI and desktop app. Tell the story of your own data.
 
 [[https://github.com/fetsorn/csvs-js][csvs-js]] - WASM/JS implementation. Serverless CRUD.
