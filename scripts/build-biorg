@@ -42,6 +42,7 @@ fi
 # check if metadir exists
 if [[ ! -d "$metadir" ]]; then
   printf 1>&2 "No metadir at %s\n" "$metadir"
+  usage
   exit 3
 fi
 
@@ -54,6 +55,7 @@ fi
 # check if config exists
 if [[ ! -f "$config" ]]; then
   printf 1>&2 "No config at %s\n" "$config"
+  usage
   exit 3
 fi
 
@@ -84,6 +86,7 @@ root=$(jq -r 'map_values(select(has("parent") | not)) | keys[0]' "$config")
 # if there are no matching properties, exit with an error
 if [ ! "$root" ]; then
   printf 1>&2 "No root property in the config %s\n" "$config"
+  usage
   exit 3
 fi
 

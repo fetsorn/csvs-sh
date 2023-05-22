@@ -4,19 +4,18 @@
 Query and edit csvs data in human-readable formats with your favorite text editor; merge, split, and clean csvs databases. Currently supported formats for editing: [[https://github.com/fetsorn/biorg-spec][biorg]].
 
 * API
-break-biorg - Reads a biorg compilation, breaks each node, outputs path to a temporary metadir
 
-build-biorg - Reads a stream of datum_uuid,datum pairs from stdin, looks up props in metadir, outputs biorg
+csvs build - Read a stream of "datum_uuid,datum" pairs from stdin, look up props in metadir, output biorg
 
-gc - Deduplicates, sorts, and removes garbage from metadir
+csvs break - Read biorg, break each node, output path to a temporary metadir
 
-lookup - Finds a value corresponding to UUID in metadir
+csvs cache - Read paths from stdin, break, output path to a temporary metadir
 
-mdirsync - Syncs metadir with a biorg file
+csvs gc - Deduplicate, sort, and remove garbage from metadir
 
-merge - merges one metadir into another
+csvs sync - Sync metadir with a biorg file
 
-unescape - removes JSON escapes from a string
+csvs merge - Merge one metadir into another
 
 * Setup
 #+begin_src sh

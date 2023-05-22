@@ -43,12 +43,15 @@
             substituteInPlace build-biorg --replace "bash" "${pkgs.bash}/bin/bash"
             substituteInPlace mdirsync --replace "bash" "${pkgs.bash}/bin/bash"
             substituteInPlace mdirsync --replace "awk" "${pkgs.gawk}/bin/awk"
+            substituteInPlace csvs --replace "awk" "${pkgs.gawk}/bin/awk"
             substituteInPlace gc --replace "jq" "${pkgs.jq}/bin/jq"
             substituteInPlace gc --replace "sponge" "${pkgs.moreutils}/bin/sponge"
             substituteInPlace lookup --replace "grep" "${pkgs.gnugrep}/bin/grep"
             substituteInPlace build-biorg --replace "grep" "${pkgs.gnugrep}/bin/grep"
             substituteInPlace merge --replace "grep" "${pkgs.gnugrep}/bin/grep"
             substituteInPlace break-biorg --replace "grep" "${pkgs.gnugrep}/bin/grep"
+            substituteInPlace break-fs --replace "parallel" "${pkgs.parallel}/bin/parallel"
+            substituteInPlace break-fs --replace "jq" "${pkgs.jq}/bin/jq"
           '';
           installPhase = ''
             mkdir -p $out/bin/

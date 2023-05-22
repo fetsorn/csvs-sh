@@ -1,0 +1,95 @@
+#!/bin/bash
+
+# list of paths | break-fs | path to a temporary metadir
+
+usage () {
+  printf 1>&2 "%s\n" "Usage: $0
+
+  Reads a list of filepaths from stdin,
+  stats each, outputs path to a temporary metadir
+
+  EXAMPLE:
+    find . | $0"
+}
+
+if [ $# -ne 0 ] || [[ -t 0 ]]; then
+  usage
+  exit 3
+fi
+
+cache_file () {
+  filepath="$1"
+  counter="$2"
+
+  # skip directories
+  if [ -d "$filepath" ]; then return; fi
+
+  temp=$(mktemp -d)
+
+  mkdir -p "$temp/props/filepath" \
+           "$temp/props/filetype" \
+           "$temp/props/filesize" \
+           "$temp/props/date" \
+           "$temp/props/datum" \
+           "$temp/pairs"
+
+  filepath_uuid=$(printf "%s" "$filepath" | sha256sum | cut -c 1-64)
+  filepath_escaped=$(printf "%s" "$filepath" | jq -R)
+  printf '%s,%s\n' "$filepath_uuid" "$filepath_escaped" > "$temp/props/filepath/index.csv"
+
+  filesize=$(stat --printf="%s" "$filepath")
+  filesize_uuid=$(printf "%s" "$filesize" | sha256sum | cut -c 1-64)
+  printf "%s,%s\n" "$filesize_uuid" "$filesize" > "$temp/props/filesize/index.csv"
+  printf "%s,%s\n" "$filepath_uuid" "$filesize_uuid" > "$temp/pairs/filepath-filesize.csv"
+
+  filetype=$(file -b "$filepath")
+  filetype_uuid=$(printf "%s" "$filetype" | sha256sum | cut -c 1-64)
+  filetype_escaped=$(printf "%s" "$filetype" | jq -R )
+  printf '%s,%s\n' "$filetype_uuid" "$filetype_escaped" > "$temp/props/filetype/index.csv"
+  printf "%s,%s\n" "$filepath_uuid" "$filetype_uuid" > "$temp/pairs/filepath-filetype.csv"
+
+  moddate=$(stat --printf="%y" "$filepath" | cut -c 1-10)
+  moddate_uuid=$(printf "%s" "$moddate" | sha256sum | cut -c 1-64)
+  printf "%s,%s\n" "$moddate_uuid" "$moddate" > "$temp/props/date/index.csv"
+  printf "%s,%s\n" "$filepath_uuid" "$moddate_uuid" > "$temp/pairs/filepath-moddate.csv"
+
+  filehash=$(sha256sum "$filepath" | cut -c 1-64)
+  printf "%s,%s\n" "$filepath_uuid" "$filehash" > "$temp/pairs/filepath-filehash.csv"
+
+  # add a datum stub to each asset
+  datum_uuid=$(uuidgen | sha256sum | cut -c 1-64)
+  printf '%s,""\n' "$datum_uuid" > "$temp/props/datum/index.csv"
+  printf '%s,%s\n' "$datum_uuid" "$filepath_uuid" > "$temp/pairs/datum-filepath.csv"
+
+  printf 1>&2 "cache: %s - %s...%s\r" "$counter" "${filepath::30}" "${filepath: -30}"
+  printf "%s\n" "$temp"
+}
+
+export -f cache_file
+
+tempins=$(parallel cache_file {} "{#}")
+printf 1>&2 "\n"
+
+tempout=$(mktemp -d)
+
+mkdir -p "$tempout/props/filepath" \
+         "$tempout/props/filetype" \
+         "$tempout/props/filesize" \
+         "$tempout/props/date" \
+         "$tempout/props/datum" \
+         "$tempout/pairs"
+
+sed 's/$/\/props\/filepath\/index.csv/'   <<< "$tempins" | xargs cat > "$tempout/props/filepath/index.csv"
+sed 's/$/\/props\/filesize\/index.csv/'   <<< "$tempins" | xargs cat > "$tempout/props/filesize/index.csv"
+sed 's/$/\/props\/filetype\/index.csv/'   <<< "$tempins" | xargs cat > "$tempout/props/filetype/index.csv"
+sed 's/$/\/props\/date\/index.csv/'       <<< "$tempins" | xargs cat > "$tempout/props/date/index.csv"
+sed 's/$/\/props\/datum\/index.csv/'      <<< "$tempins" | xargs cat > "$tempout/props/datum/index.csv"
+sed 's/$/\/pairs\/filepath-filesize.csv/' <<< "$tempins" | xargs cat > "$tempout/pairs/filepath-filesize.csv"
+sed 's/$/\/pairs\/filepath-filetype.csv/' <<< "$tempins" | xargs cat > "$tempout/pairs/filepath-filetype.csv"
+sed 's/$/\/pairs\/filepath-moddate.csv/'  <<< "$tempins" | xargs cat > "$tempout/pairs/filepath-moddate.csv"
+sed 's/$/\/pairs\/filepath-filehash.csv/' <<< "$tempins" | xargs cat > "$tempout/pairs/filepath-filehash.csv"
+sed 's/$/\/pairs\/datum-filepath.csv/'    <<< "$tempins" | xargs cat > "$tempout/pairs/datum-filepath.csv"
+
+xargs rm -r <<< "$tempins"
+
+printf "%s\n" "$tempout"
